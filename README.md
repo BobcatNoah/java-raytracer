@@ -6,7 +6,3 @@ Can be run with
 javac *.java
 java Main > image.ppm
 ```
-or just
-```
-java Main.java > image.ppm
-```
