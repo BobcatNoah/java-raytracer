@@ -1,23 +1,11 @@
 class Main {
-    private static double hit_sphere(Vec3 center, double radius, Ray r) {
-        Vec3 oc = r.origin().minus(center);
-        double a = r.direction().length_squared();
-        double half_b = Vec3.dot(oc, r.direction());
-        double c = oc.length_squared() - radius * radius;
-        double discriminant = half_b*half_b - a*c;
-
-        if (discriminant < 0) {
-            return -1;
-        } else {
-            return (-half_b - Math.sqrt(discriminant)) / a;
+    private static Vec3 ray_color(final Ray r, final HittableList world) {
+        HitRecord rec = new HitRecord();
+        if (world.hit(r, 0, RTWeekend.infinity, rec)) {
+            rec = world.getLatestHitRecord();
+            return rec.normal.plus(new Vec3(1,1,1)).multiply(0.5);
         }
-    }
-    private static Vec3 ray_color(Ray r) {
-        double t = hit_sphere(new Vec3(0,0,-1), 0.5, r);
-        if (t > 0) {
-            Vec3 N = Vec3.unit_vector(r.at(t).minus(new Vec3(0,0,-1)));
-            return new Vec3(N.x() + 1, N.y() + 1, N.z() + 1).multiply(0.5);
-        }
+        
 
         Vec3 unit_direction = Vec3.unit_vector(r.direction());
         double a = 0.5 * (unit_direction.y() + 1.0);
@@ -30,9 +18,18 @@ class Main {
         int image_height = (int)(image_width / aspect_ratio);
         image_height = (image_height < 1) ? 1 : image_height;
 
+        // World
+        HittableList world = new HittableList();
+
+        world.add(new Sphere(new Vec3(0,0,-2), 0.5));
+        world.add(new Sphere(new Vec3(0, -100.5,-1), 100));
+
+        world.add(new Sphere(new Vec3(-0.5, -0.25, -1.75), 0.25));
+        world.add(new Sphere(new Vec3(3, -0.25, -4), 0.25));
+
         // Camera
         // Viewport widths less than one are ok since they are real valued.
-        double focal_length  = 1.0;
+        double focal_length  = 2;
         double viewport_height = 2.0;
         double viewport_width = viewport_height * ((double)image_width / image_height);
         Vec3 camera_center = new Vec3(0,0,0);
@@ -75,7 +72,8 @@ class Main {
                 );
                 Vec3 ray_direction = pixel_center.minus(camera_center);
                 Ray r = new Ray(camera_center, ray_direction);
-                Vec3 pixel_color = ray_color(r);
+
+                Vec3 pixel_color = ray_color(r, world);
                 //Color.write_color(pixel_color);
                 //scanLine += String.format("%d %d %d ", (int)(255 * pixel_color.x()), (int)(255 * pixel_color.y()), (int)(255 * pixel_color.z()));
                 scanLineBuilder.append(String.format("%d %d %d ", (int)(255 * pixel_color.x()), (int)(255 * pixel_color.y()), (int)(255 * pixel_color.z())));
