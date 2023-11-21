@@ -23,15 +23,15 @@ public class HittableList implements Hittable {
     }
 
     @Override
-    public boolean hit(Ray r, double ray_tmin, double ray_tmax, HitRecord rec) {
+    public boolean hit(Ray r, Interval ray_t, HitRecord rec) {
         HitRecord tempRec = new HitRecord();
         boolean hitAnything = false;
-        double closestSoFar = ray_tmax;
+        double closestSoFar = ray_t.max;
 
         // Each object implements Hittable. Thus, each object can have its own hit method.
         for (Hittable object : objects) {
             // object.hit updates tempRec within the hit method.
-            if(object.hit(r, ray_tmin, closestSoFar, tempRec)) {
+            if(object.hit(r, new Interval(ray_t.min, closestSoFar), tempRec)) {
                 hitAnything = true;
                 closestSoFar = tempRec.t;
                 rec = tempRec;

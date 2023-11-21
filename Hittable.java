@@ -1,3 +1,3 @@
 public interface Hittable {
-    public boolean hit(Ray r, double ray_tmin, double ray_tmax, HitRecord rec);
+    public boolean hit(Ray r, Interval ray_t, HitRecord rec);
 }

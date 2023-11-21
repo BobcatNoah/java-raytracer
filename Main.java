@@ -1,7 +1,7 @@
 class Main {
     private static Vec3 ray_color(final Ray r, final HittableList world) {
         HitRecord rec = new HitRecord();
-        if (world.hit(r, 0, RTWeekend.infinity, rec)) {
+        if (world.hit(r, new Interval(0 , RTWeekend.infinity), rec)) {
             rec = world.getLatestHitRecord();
             return rec.normal.plus(new Vec3(1,1,1)).multiply(0.5);
         }
@@ -25,7 +25,8 @@ class Main {
         world.add(new Sphere(new Vec3(0, -100.5,-1), 100));
 
         world.add(new Sphere(new Vec3(-0.5, -0.25, -1.75), 0.25));
-        world.add(new Sphere(new Vec3(3, -0.25, -4), 0.25));
+        world.add(new Sphere(new Vec3(2, -0.5, -3), 0.25));
+         world.add(new Sphere(new Vec3(1, -0.4, -2.25), 0.25));
 
         // Camera
         // Viewport widths less than one are ok since they are real valued.
