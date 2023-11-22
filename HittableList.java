@@ -3,7 +3,7 @@ import java.util.List;
 
 public class HittableList implements Hittable {
     public List<Hittable> objects = new ArrayList<Hittable>();
-    private HitRecord latestHitRecord = new HitRecord();
+    private volatile HitRecord latestHitRecord = new HitRecord();
 
     public HittableList() {};
     public HittableList(Hittable object) {
@@ -20,6 +20,14 @@ public class HittableList implements Hittable {
 
     public HitRecord getLatestHitRecord() {
         return latestHitRecord;
+    }
+
+    public HittableList createCopy() {
+        HittableList copy = new HittableList();
+        for (Hittable i : objects) {
+            copy.add(i);
+        }
+        return copy;
     }
 
     @Override

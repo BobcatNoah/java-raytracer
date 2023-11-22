@@ -21,4 +21,8 @@ public class Interval {
         return min < x && x < max;
     }
 
+    public String toString() {
+        return String.format("range(%f, %f) ", min, max);
+    }
+
 }
