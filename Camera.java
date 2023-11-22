@@ -70,7 +70,6 @@ public class Camera {
         StringBuilder scanLineBuilder = new StringBuilder();
 
         for (int j = 0; j < imageHeight; j++) {
-            //String scanLine = "";
             scanLineBuilder.setLength(0);
             System.err.print("\rScanlines remaining: " + (imageHeight - j) + ' ');
             System.err.flush();
@@ -85,13 +84,9 @@ public class Camera {
                 Ray r = new Ray(center, ray_direction);
 
                 Vec3 pixel_color = rayColor(r, world);
-                //Color.write_color(pixel_color);
-                //scanLine += String.format("%d %d %d ", (int)(255 * pixel_color.x()), (int)(255 * pixel_color.y()), (int)(255 * pixel_color.z()));
-                //scanLineBuilder.append(String.format("%d %d %d ", (int)(255 * pixel_color.x()), (int)(255 * pixel_color.y()), (int)(255 * pixel_color.z())));
-                System.out.println(String.format("%d %d %d", (int)(255 * pixel_color.x()), (int)(255 * pixel_color.y()), (int)(255 * pixel_color.z())));
+                scanLineBuilder.append(String.format("%d %d %d ", (int)(255 * pixel_color.x()), (int)(255 * pixel_color.y()), (int)(255 * pixel_color.z())));
             }
-            //System.out.print(scanLine + "\n");
-            //System.out.print(scanLineBuilder.toString() + "\n");
+            System.out.print(scanLineBuilder.toString() + "\n");
         }
 
         System.err.print("\rDone.                           \n");
