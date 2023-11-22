@@ -8,3 +8,5 @@ javac *.java
 java Main > image.ppm
 ```
 Don't expect much just yet. I'm going to implement textures very very soon.
+
+If you're on windows, make sure to run this in CMD, otherwise the ppm file won't be viewable.
