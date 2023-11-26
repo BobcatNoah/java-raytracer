@@ -25,4 +25,14 @@ public class Interval {
         return String.format("range(%f, %f) ", min, max);
     }
 
+    public double clamp(double x) {
+        if (x < min) {
+            return min;
+        }
+        if (x > max) {
+            return max;
+        }
+        return x;
+    }
+
 }

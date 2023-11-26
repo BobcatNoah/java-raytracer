@@ -1,32 +1,12 @@
 public class Camera {
     public double aspectRatio = 1.0;
     public int imageWidth = 100;
+    public int samplesPerPixel = 10;
     private int imageHeight;
     private Vec3 center;
     private Vec3 pixel00Loc;
     private Vec3 pixelDeltaU;
     private Vec3 pixelDeltaV;
-
-    public int getImageHeight() {
-        return imageHeight;
-    }
-
-    public Vec3 getCenter() {
-        return center;
-    }
-
-    public Vec3 getPixel00Loc() {
-        return pixel00Loc;
-    }
-
-    public Vec3 getPixelDeltaU() {
-        return pixelDeltaU;
-    }
-
-    public Vec3 getPixelDeltaV() {
-        return pixelDeltaV;
-    }
-    
 
     public void multiThreadedRender(final HittableList world, int threads) {
         initialize();
@@ -35,7 +15,7 @@ public class Camera {
         for (int i = 0; i < threads - 1; i++) {
             HittableList worldCopy = world.createCopy();
             Interval currentRows = new Interval(i * imageHeight / threads, (i + 1) * imageHeight / threads);
-            MultiThreadedRender chunk = new MultiThreadedRender(worldCopy, currentRows, pixel00Loc, pixelDeltaU, pixelDeltaV, imageWidth);
+            MultiThreadedRender chunk = new MultiThreadedRender(worldCopy, currentRows, pixel00Loc, pixelDeltaU, pixelDeltaV, imageWidth, center, samplesPerPixel);
             Thread thread = new Thread(chunk, "thread");
             chunks[i] = chunk;
             jobs[i] = thread;
@@ -43,7 +23,7 @@ public class Camera {
         }
         
         HittableList worldCopy = world.createCopy();
-        MultiThreadedRender chunk = new MultiThreadedRender(worldCopy, new Interval((threads - 1) * imageHeight / threads, imageHeight), pixel00Loc, pixelDeltaU, pixelDeltaV, imageWidth);
+        MultiThreadedRender chunk = new MultiThreadedRender(worldCopy, new Interval((threads - 1) * imageHeight / threads, imageHeight), pixel00Loc, pixelDeltaU, pixelDeltaV, imageWidth, center, samplesPerPixel);
         Thread thread = new Thread(chunk, "finalthread");
         jobs[threads - 1] = thread;
         chunks[threads - 1] = chunk;
@@ -74,19 +54,14 @@ public class Camera {
             System.err.print("\rScanlines remaining: " + (imageHeight - j) + ' ');
             System.err.flush();
             for (int i = 0; i < imageWidth; i++) {
-                Vec3 pixel_center = pixel00Loc
-                .plus(
-                    pixelDeltaU.multiply(i)
-                ).plus(
-                    pixelDeltaV.multiply(j)  
-                );
-                Vec3 ray_direction = pixel_center.minus(center);
-                Ray r = new Ray(center, ray_direction);
-
-                Vec3 pixel_color = rayColor(r, world);
-                scanLineBuilder.append(String.format("%d %d %d ", (int)(255 * pixel_color.x()), (int)(255 * pixel_color.y()), (int)(255 * pixel_color.z())));
+                Vec3 pixelColor = new Vec3(0,0,0);
+                for (int sample = 0; sample < samplesPerPixel; sample++) {
+                    Ray r = getRay(i, j);
+                    pixelColor = pixelColor.plus(rayColor(r, world));
+                }
+                scanLineBuilder.append(Color.getColor(pixelColor, samplesPerPixel));
             }
-            System.out.print(scanLineBuilder.toString() + "\n");
+            System.out.print(scanLineBuilder.toString());
         }
 
         System.err.print("\rDone.                           \n");
@@ -124,7 +99,7 @@ public class Camera {
 
     }
 
-    private Vec3 rayColor(final Ray r, final HittableList world) {
+    public static Vec3 rayColor(final Ray r, final HittableList world) {
         HitRecord rec = new HitRecord();
         if (world.hit(r, new Interval(0 , RTWeekend.infinity), rec)) {
             rec = world.getLatestHitRecord();
@@ -135,5 +110,26 @@ public class Camera {
         Vec3 unit_direction = Vec3.unit_vector(r.direction());
         double a = 0.5 * (unit_direction.y() + 1.0);
         return new Vec3(1.0,1.0,1.0).multiply(1.0 - a).plus(new Vec3(0.5, 0.7, 1.0).multiply(a));
+    }
+
+    private Ray getRay(int i, int j) {
+        Vec3 pixelCenter = pixel00Loc
+                .plus(
+                    pixelDeltaU.multiply(i)
+                ).plus(
+                    pixelDeltaV.multiply(j)  
+                );
+        Vec3 pixelSample = pixelSampleSquare().plus(pixelCenter);
+
+        Vec3 rayOrigin = center;
+        Vec3 rayDirection = pixelSample.minus(rayOrigin);
+
+        return new Ray(rayOrigin, rayDirection);
+    }
+
+    private Vec3 pixelSampleSquare() {
+        double px = -0.5 * Math.random();
+        double py = -0.5 * Math.random();
+        return pixelDeltaU.multiply(px).plus(pixelDeltaV.multiply(py));
     }
 }

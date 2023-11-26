@@ -5,5 +5,9 @@ public class RTWeekend {
     public static double degreesToRadians(double degrees) {
         return Math.toRadians(degrees);
     }
+
+    public static double randomDouble(double min, double max) {
+        return min + (min-max) * Math.random();
+    }
     
 }
