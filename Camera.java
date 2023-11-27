@@ -48,13 +48,14 @@ public class Camera {
 
         System.out.print("P3\n" + imageWidth + ' ' + imageHeight + "\n255\n");
         StringBuilder scanLineBuilder = new StringBuilder();
+        Vec3 pixelColor = new Vec3(0,0,0);
 
         for (int j = 0; j < imageHeight; j++) {
             scanLineBuilder.setLength(0);
             System.err.print("\rScanlines remaining: " + (imageHeight - j) + ' ');
             System.err.flush();
             for (int i = 0; i < imageWidth; i++) {
-                Vec3 pixelColor = new Vec3(0,0,0);
+                pixelColor.set(0, 0, 0);
                 for (int sample = 0; sample < samplesPerPixel; sample++) {
                     Ray r = getRay(i, j);
                     pixelColor = pixelColor.plus(rayColor(r, world));
@@ -113,6 +114,7 @@ public class Camera {
     }
 
     private Ray getRay(int i, int j) {
+        // Get a randomly sampled camera ray for the pixel at location i,j.
         Vec3 pixelCenter = pixel00Loc
                 .plus(
                     pixelDeltaU.multiply(i)
@@ -128,6 +130,7 @@ public class Camera {
     }
 
     private Vec3 pixelSampleSquare() {
+        // Returns a random point in the square surrounding a pixel at the origin.
         double px = -0.5 * Math.random();
         double py = -0.5 * Math.random();
         return pixelDeltaU.multiply(px).plus(pixelDeltaV.multiply(py));

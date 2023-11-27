@@ -66,13 +66,22 @@ public class Vec3 {
              + u.e[2] * v.e[2];
     }
 
-    // TODO: Dot Product and cross product
-    /*inline double dot(const vec3 &u, const vec3 &v) {
-        return u.e[0] * v.e[0]
-             + u.e[1] * v.e[1]
-             + u.e[2] * v.e[2];
-        } 
-        
+    public void set(double e0, double e1, double e2) {
+        e[0] = e0;
+        e[1] = e1;
+        e[2] = e2;
+    }
+
+    public static Vec3 random() {
+        return new Vec3(Math.random(), Math.random(), Math.random());
+    }
+
+    public static Vec3 random(double min, double max) {
+        return new Vec3(RTWeekend.randomDouble(min, max), RTWeekend.randomDouble(min, max), RTWeekend.randomDouble(min, max));
+    }
+
+    // TODO: cross product
+    /*  
         inline vec3 cross(const vec3 &u, const vec3 &v) {
             return vec3(u.e[1] * v.e[2] - u.e[2] * v.e[1],
                 u.e[2] * v.e[0] - u.e[0] * v.e[2],

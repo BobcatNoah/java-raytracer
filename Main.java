@@ -15,8 +15,9 @@ class Main {
 
         cam.aspectRatio = 16.0 / 9.0;
         cam.imageWidth = 1280;
+        cam.samplesPerPixel = 10;
 
-        //cam.render(world);
-        cam.multiThreadedRender(world, 1);
+        cam.render(world);
+        //cam.multiThreadedRender(world, availableThreads / 2);
     }
 }
