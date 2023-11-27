@@ -2,6 +2,8 @@ public class Camera {
     public double aspectRatio = 1.0;
     public int imageWidth = 100;
     public int samplesPerPixel = 10;
+    public int maxDepth = 10;
+
     private int imageHeight;
     private Vec3 center;
     private Vec3 pixel00Loc;
@@ -59,7 +61,7 @@ public class Camera {
                 pixelColor.set(0, 0, 0);
                 for (int sample = 0; sample < samplesPerPixel; sample++) {
                     Ray r = getRay(i, j);
-                    pixelColor = pixelColor.plus(rayColor(r, world));
+                    pixelColor.plusEquals(rayColor(r, maxDepth, world));
                 }
                 scanLineBuilder.append(Color.getColor(pixelColor, samplesPerPixel));
             }
@@ -101,12 +103,24 @@ public class Camera {
 
     }
 
-    public static Vec3 rayColor(final Ray r, final HittableList world) {
+    public static Vec3 rayColor(final Ray r, int depth, final HittableList world) {
         HitRecord rec = new HitRecord();
-        if (world.hit(r, new Interval(0 , RTWeekend.infinity), rec)) {
+
+        if (depth <= 0) {
+            return new Vec3(0,0,0);
+        }
+
+        if (world.hit(r, new Interval(0.001 , RTWeekend.infinity), rec)) {
+            Ray scattered = new Ray();
+            Vec3 attenuation = new Vec3();
             rec = world.getLatestHitRecord();
-            Vec3 direction = Vec3.randomOnHemisphere(rec.normal);
-            return rayColor(new Ray(rec.p, direction), world).multiply(0.5);
+            if (rec.mat.scatter(r, rec, attenuation, scattered)) {
+                scattered = rec.mat.getScattered();
+                attenuation = rec.mat.getAttenuation();
+                return attenuation.multiply(rayColor(scattered, depth - 1, world));
+            }
+            //Vec3 direction = rec.normal.plus(Vec3.randomUnitVector());
+            //return rayColor(new Ray(rec.p, direction), depth - 1, world).multiply(0.1);
             //return rec.normal.plus(new Vec3(1,1,1)).multiply(0.5);
         }
         

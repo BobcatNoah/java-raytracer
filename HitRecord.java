@@ -4,6 +4,7 @@ public class HitRecord {
     public Vec3 normal;
     public double t;
     public boolean front_face;
+    public Material mat;
 
     public void set_face_normal(Ray r, Vec3 outward_normal) {
         // Sets the hit record normal vector.

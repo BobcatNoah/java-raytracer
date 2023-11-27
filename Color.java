@@ -9,9 +9,17 @@ public class Color {
         g /= samplesPerPixel;
         b /= samplesPerPixel;
 
+        r = linearToGamma(r);
+        g = linearToGamma(g);
+        b = linearToGamma(b);
+
         // Write the translated [0,255] value of each color component.
         final Interval intensity = new Interval(0.000, 0.999);
         return String.format("%d %d %d\n", (int)(256 * intensity.clamp(r)), (int)(256 * intensity.clamp(g)), (int)(256 * intensity.clamp(b)));
+    }
+
+    public static double linearToGamma(double linearComponent) {
+        return Math.sqrt(linearComponent);
     }
 
 }

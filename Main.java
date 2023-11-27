@@ -4,18 +4,26 @@ class Main {
         // World
         HittableList world = new HittableList();
 
-        world.add(new Sphere(new Vec3(0,0,-1), 0.5));
-        //world.add(new Sphere(new Vec3(0, -100.5,-1), 100));
+        // Create a lambertian material with color
+        Lambertian materialGround = new Lambertian(new Vec3(0.8, 0.8, 0.0));
+        Lambertian materialCenter = new Lambertian(new Vec3(0.7, 0.3, 0.3));
+        Metal materialLeft = new Metal(new Vec3(0.8, 0.8, 0.8));
+        Metal materialRight= new Metal(new Vec3(0.8, 0.6, 0.2));
 
-        //world.add(new Sphere(new Vec3(-0.5, -0.25, -1.75), 0.25));
-        //world.add(new Sphere(new Vec3(2, -0.5, -3), 0.25));
-        //world.add(new Sphere(new Vec3(1, -0.4, -2.25), 0.25));
+        world.add(new Sphere(new Vec3(0,0,-1), 0.5, materialCenter));
+        world.add(new Sphere(new Vec3(0, -100.5,-1), 100, materialGround));
+        world.add(new Sphere(new Vec3(-1,0,-1), 0.5, materialLeft));
+        world.add(new Sphere(new Vec3(1,0,-1), 0.5, materialRight));
+
+
+        world.add(new Sphere(new Vec3(0.75,-0.5,-1), 0.25, materialCenter));
 
         Camera cam = new Camera();
 
         cam.aspectRatio = 16.0 / 9.0;
         cam.imageWidth = 400;
         cam.samplesPerPixel = 100;
+        cam.maxDepth = 50;
 
         long start = System.currentTimeMillis();
         cam.render(world);

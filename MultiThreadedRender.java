@@ -44,7 +44,8 @@ public class MultiThreadedRender implements Runnable {
                pixelColor.set(0, 0, 0);
                 for (int sample = 0; sample < samplesPerPixel; sample++) {
                     Ray r = getRay(i, j);
-                    pixelColor.plusEquals(Camera.rayColor(r, world));
+                    // Set up depth
+                    pixelColor.plusEquals(Camera.rayColor(r, 10, world));
                 }
                 output.append(Color.getColor(pixelColor, samplesPerPixel));
             }

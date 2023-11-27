@@ -1,10 +1,12 @@
 public class Sphere implements Hittable {
     private Vec3 center;
     private double radius;
+    private Material mat;
 
-    public Sphere(Vec3 _center, double _radius) {
+    public Sphere(Vec3 _center, double _radius, Material _material) {
         this.center = _center;
         this.radius = _radius;
+        this.mat = _material;
     }
 
     public boolean hit(Ray r, Interval ray_t, HitRecord rec) {
@@ -33,6 +35,7 @@ public class Sphere implements Hittable {
         Vec3 outward_normal = rec.p.minus(center).divideBy(radius);
         // The surface normal is the hit point minus the center, then divided by radius in order to normalize on scale [0,1]
         rec.set_face_normal(r, outward_normal);
+        rec.mat = mat;
 
         return true;
     }

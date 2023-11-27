@@ -28,7 +28,7 @@ public class Vec3 {
         return new Vec3(e[0] + v.e[0], e[1] + v.e[1], e[2] + v.e[2]);
     }
 
-    public void plusEquals(Vec3 v) {
+    public void plusEquals(final Vec3 v) {
         e[0] += v.e[0];
         e[1] += v.e[1];
         e[2] += v.e[2];
@@ -52,6 +52,13 @@ public class Vec3 {
 
     public double lengthSquared() {
         return e[0] * e[0] + e[1] * e[1] + e[2] * e[2];
+    }
+
+    public boolean nearZero() {
+        // Return true if the vector is close to zero in all dimensions.
+        double s = 1e-8;
+        return (Math.abs(e[0]) < s) && (Math.abs(e[1]) < s) && (Math.abs(e[2]) < s);
+
     }
 
     public String toString() {
@@ -106,6 +113,10 @@ public class Vec3 {
         } else {
             return onUnitSphere.negate();
         }
+    }
+
+    public static Vec3 reflect(final Vec3 v, final Vec3 n) {
+        return v.minus(n.multiply(2).multiply(dot(v,n)));
     }
     // TODO: cross product
     /*  
