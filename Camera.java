@@ -36,7 +36,8 @@ public class Camera {
             try {
                 jobs[i].join();
                 System.out.print(chunks[i].getOutput());
-                System.err.print("\rChunk: " + i + " Done.  ");
+                System.err.println("Chunk " + i + ": " + chunks[i].getTime() + " milliseconds");
+                System.err.println(chunks[i].scanLinesToBeRendered);
             } catch (InterruptedException e) {
                 // TODO: handle exception
             }
@@ -75,7 +76,7 @@ public class Camera {
 
         center =  new Vec3(0, 0, 0);
 
-        double focalLength  = 2;
+        double focalLength  = 1;
         double viewportHeight = 2.0;
         double viewportWidth = viewportHeight * ((double)imageWidth / imageHeight);
 
@@ -104,7 +105,9 @@ public class Camera {
         HitRecord rec = new HitRecord();
         if (world.hit(r, new Interval(0 , RTWeekend.infinity), rec)) {
             rec = world.getLatestHitRecord();
-            return rec.normal.plus(new Vec3(1,1,1)).multiply(0.5);
+            Vec3 direction = Vec3.randomOnHemisphere(rec.normal);
+            return rayColor(new Ray(rec.p, direction), world).multiply(0.5);
+            //return rec.normal.plus(new Vec3(1,1,1)).multiply(0.5);
         }
         
 

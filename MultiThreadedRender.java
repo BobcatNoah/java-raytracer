@@ -1,6 +1,7 @@
 public class MultiThreadedRender implements Runnable {
     private StringBuilder output = new StringBuilder();
     public Interval scanLinesToBeRendered = new Interval(0,0);
+
     private HittableList world;
     private Vec3 pixel00Loc;
     private Vec3 pixelDeltaU;
@@ -8,6 +9,7 @@ public class MultiThreadedRender implements Runnable {
     private int imageWidth = 100;
     private Vec3 center = new Vec3(0,0,0);
     private int samplesPerPixel = 1;
+    private long totalTime = 0;
 
     public MultiThreadedRender(final HittableList world, final Interval pixels, Vec3 pixel00Loc, Vec3 pixelDeltaU, Vec3 pixelDeltaV, int imageWidth, Vec3 center, int samples) {
         this.world = world;
@@ -24,8 +26,13 @@ public class MultiThreadedRender implements Runnable {
         return output.toString();
     }
 
+    public long getTime() {
+        return totalTime;
+    }
+
     @Override
     public void run() {
+        long start = System.currentTimeMillis();
         int startRow = (int)scanLinesToBeRendered.min;
         int endRow = (int)scanLinesToBeRendered.max;
         Vec3 pixelColor = new Vec3(0,0,0);
@@ -37,13 +44,14 @@ public class MultiThreadedRender implements Runnable {
                pixelColor.set(0, 0, 0);
                 for (int sample = 0; sample < samplesPerPixel; sample++) {
                     Ray r = getRay(i, j);
-                    pixelColor = pixelColor.plus(Camera.rayColor(r, world));
+                    pixelColor.plusEquals(Camera.rayColor(r, world));
                 }
                 output.append(Color.getColor(pixelColor, samplesPerPixel));
             }
 
         }
-        //System.err.print("\rDone.                           \n");
+        long end = System.currentTimeMillis();
+        totalTime = end - start;
     }
 
     private Ray getRay(int i, int j) {

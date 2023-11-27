@@ -1,5 +1,5 @@
 public class Vec3 {
-    private double[] e = new double[3];
+    public double[] e = new double[3];
 
     public Vec3() {}
     public Vec3(double e0, double e1, double e2) {
@@ -25,7 +25,13 @@ public class Vec3 {
     }
 
     public Vec3 plus(Vec3 v) {
-        return new Vec3(e[0] + v.x(), e[1] + v.y(), e[2] + v.z());
+        return new Vec3(e[0] + v.e[0], e[1] + v.e[1], e[2] + v.e[2]);
+    }
+
+    public void plusEquals(Vec3 v) {
+        e[0] += v.e[0];
+        e[1] += v.e[1];
+        e[2] += v.e[2];
     }
 
     public Vec3 multiply(double t) {
@@ -33,7 +39,7 @@ public class Vec3 {
     }
 
     public Vec3 multiply(Vec3 v) {
-        return new Vec3(v.x() * e[0], v.y() * e[1], v.z() * e[2]);
+        return new Vec3(v.e[0] * e[0], v.e[1] * e[1], v.e[2] * e[2]);
     }
 
     public Vec3 divideBy(double t) {
@@ -41,10 +47,10 @@ public class Vec3 {
     }
 
     public double length() {
-        return Math.sqrt(length_squared());
+        return Math.sqrt(lengthSquared());
     }
 
-    public double length_squared() {
+    public double lengthSquared() {
         return e[0] * e[0] + e[1] * e[1] + e[2] * e[2];
     }
 
@@ -53,7 +59,7 @@ public class Vec3 {
     }
 
     public Vec3 minus(Vec3 v) {
-        return new Vec3(e[0] - v.x(), e[1] - v.y(), e[2] - v.z());
+        return new Vec3(e[0] - v.e[0], e[1] - v.e[1], e[2] - v.e[2]);
     }
 
     public static Vec3 unit_vector(Vec3 v) {
@@ -80,6 +86,27 @@ public class Vec3 {
         return new Vec3(RTWeekend.randomDouble(min, max), RTWeekend.randomDouble(min, max), RTWeekend.randomDouble(min, max));
     }
 
+    public static Vec3 randomInUnitSphere() {
+        while (true) {
+            Vec3 p = Vec3.random(-1,1);
+            if (p.lengthSquared() < 1) {
+                return p;
+            }
+        }
+    }
+
+    public static Vec3 randomUnitVector() {
+        return unit_vector(randomInUnitSphere());
+    }
+    
+    public static Vec3 randomOnHemisphere(final Vec3 normal) {
+        Vec3 onUnitSphere = randomUnitVector();
+        if (dot(onUnitSphere, normal) > 0.0) {
+            return onUnitSphere;
+        } else {
+            return onUnitSphere.negate();
+        }
+    }
     // TODO: cross product
     /*  
         inline vec3 cross(const vec3 &u, const vec3 &v) {

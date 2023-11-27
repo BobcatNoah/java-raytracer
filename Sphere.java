@@ -9,9 +9,9 @@ public class Sphere implements Hittable {
 
     public boolean hit(Ray r, Interval ray_t, HitRecord rec) {
         Vec3 oc = r.origin().minus(center);
-        double a = r.direction().length_squared();
+        double a = r.direction().lengthSquared();
         double half_b = Vec3.dot(oc, r.direction());
-        double c = oc.length_squared() - radius * radius;
+        double c = oc.lengthSquared() - radius * radius;
         double discriminant = half_b*half_b - a*c;
 
         if (discriminant < 0) {

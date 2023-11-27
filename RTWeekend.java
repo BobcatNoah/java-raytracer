@@ -7,7 +7,7 @@ public class RTWeekend {
     }
 
     public static double randomDouble(double min, double max) {
-        return min + (min-max) * Math.random();
+        return min + (max - min) * Math.random();
     }
     
 }
