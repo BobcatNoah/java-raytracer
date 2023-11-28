@@ -4,6 +4,12 @@ public class Camera {
     public int samplesPerPixel = 10;
     public int maxDepth = 10;
 
+    public double vfov = 90;                        // Vertical view angle (field of view)
+    public Vec3 lookFrom =  new Vec3(0,0,-1); // Point camera is looking from
+    public Vec3 lookAt = new Vec3(0,0,0);  // Point camera is looking at
+    public Vec3 vup = new Vec3(0,1,0);     // Camera-relative "up" direction
+    private Vec3 u, v, w;        // Camera frame basis vectors
+
     private int imageHeight;
     private Vec3 center;
     private Vec3 pixel00Loc;
@@ -59,8 +65,14 @@ public class Camera {
             System.err.flush();
             for (int i = 0; i < imageWidth; i++) {
                 pixelColor.set(0, 0, 0);
+                Vec3 pixelCenter = pixel00Loc
+                .plus(
+                    pixelDeltaU.multiply(i)
+                ).plus(
+                    pixelDeltaV.multiply(j)  
+                );
                 for (int sample = 0; sample < samplesPerPixel; sample++) {
-                    Ray r = getRay(i, j);
+                    Ray r = getRay(i, j, pixelCenter);
                     pixelColor.plusEquals(rayColor(r, maxDepth, world));
                 }
                 scanLineBuilder.append(Color.getColor(pixelColor, samplesPerPixel));
@@ -76,24 +88,31 @@ public class Camera {
         imageHeight = (int)(imageWidth / aspectRatio);
         imageHeight = (imageHeight < 1) ? 1 : imageHeight;
 
-        center =  new Vec3(0, 0, 0);
+        center =  lookFrom;
 
-        double focalLength  = 1;
-        double viewportHeight = 2.0;
+        double focalLength  = lookFrom.minus(lookAt).length();
+        System.err.println(focalLength);
+        double theta = RTWeekend.degreesToRadians(vfov);
+        double h = Math.tan(theta/2);
+        double viewportHeight = 2 * h * focalLength;
         double viewportWidth = viewportHeight * ((double)imageWidth / imageHeight);
 
+        // Calculate the u,v,w unit basis vectors for the camera coordinate frame.
+        w = Vec3.unit_vector(lookFrom.minus(lookAt));
+        u = Vec3.unit_vector(Vec3.cross(vup, w));
+        v = Vec3.cross(w, u);
+
         // Calculate the vectors across the horizontal and down the vertical viewport edges.
-        Vec3 viewportU = new Vec3(viewportWidth, 0, 0);
-        Vec3 viewportV = new Vec3(0, -viewportHeight, 0);
+        Vec3 viewportU = u.multiply(viewportWidth);             // Vector across viewport horizontal edge
+        Vec3 viewportV = v.multiply(viewportHeight).negate();   // Vector down viewport vertical edge
 
         // Calculate the horizontal and vertical delta vectors from pixel to pixel.
         pixelDeltaU = viewportU.divideBy(imageWidth);
         pixelDeltaV = viewportV.divideBy(imageHeight);
 
         // Calculate the location of the upper left pixel.
-        Vec3 viewportUpperLeft = center
-        .minus(
-            new Vec3(0, 0, focalLength)
+        Vec3 viewportUpperLeft = center.minus(
+            w.multiply(focalLength)
         ).minus(
             viewportU.divideBy(2)
         ).minus(
@@ -128,14 +147,8 @@ public class Camera {
         return new Vec3(1.0,1.0,1.0).multiply(1.0 - a).plus(new Vec3(0.5, 0.7, 1.0).multiply(a));
     }
 
-    private Ray getRay(int i, int j) {
+    private Ray getRay(int i, int j, Vec3 pixelCenter) {
         // Get a randomly sampled camera ray for the pixel at location i,j.
-        Vec3 pixelCenter = pixel00Loc
-                .plus(
-                    pixelDeltaU.multiply(i)
-                ).plus(
-                    pixelDeltaV.multiply(j)  
-                );
         Vec3 pixelSample = pixelSampleSquare().plus(pixelCenter);
 
         Vec3 rayOrigin = center;

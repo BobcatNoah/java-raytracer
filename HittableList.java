@@ -42,8 +42,9 @@ public class HittableList implements Hittable {
             if(object.hit(r, new Interval(ray_t.min, closestSoFar), tempRec)) {
                 hitAnything = true;
                 closestSoFar = tempRec.t;
-                rec = tempRec;
-                latestHitRecord = rec;
+                latestHitRecord = tempRec;
+                //rec = tempRec;
+                //latestHitRecord = rec;
             }
         }
         return hitAnything;
