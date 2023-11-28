@@ -7,8 +7,8 @@ class Main {
         // Create a lambertian material with color
         Lambertian materialGround = new Lambertian(new Vec3(0.8, 0.8, 0.0));
         Lambertian materialCenter = new Lambertian(new Vec3(0.7, 0.3, 0.3));
-        Metal materialLeft = new Metal(new Vec3(0.8, 0.8, 0.8));
-        Metal materialRight= new Metal(new Vec3(0.8, 0.6, 0.2));
+        Metal materialLeft = new Metal(new Vec3(0.8, 0.8, 0.8), 0.3);
+        Metal materialRight= new Metal(new Vec3(0.8, 0.6, 0.2), 1);
 
         world.add(new Sphere(new Vec3(0,0,-1), 0.5, materialCenter));
         world.add(new Sphere(new Vec3(0, -100.5,-1), 100, materialGround));
@@ -16,7 +16,7 @@ class Main {
         world.add(new Sphere(new Vec3(1,0,-1), 0.5, materialRight));
 
 
-        world.add(new Sphere(new Vec3(0.75,-0.5,-1), 0.25, materialCenter));
+        //world.add(new Sphere(new Vec3(0.75,-0.5,-1), 0.25, materialCenter));
 
         Camera cam = new Camera();
 

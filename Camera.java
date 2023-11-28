@@ -111,17 +111,15 @@ public class Camera {
         }
 
         if (world.hit(r, new Interval(0.001 , RTWeekend.infinity), rec)) {
+            rec = world.getLatestHitRecord();
             Ray scattered = new Ray();
             Vec3 attenuation = new Vec3();
-            rec = world.getLatestHitRecord();
             if (rec.mat.scatter(r, rec, attenuation, scattered)) {
                 scattered = rec.mat.getScattered();
                 attenuation = rec.mat.getAttenuation();
                 return attenuation.multiply(rayColor(scattered, depth - 1, world));
             }
-            //Vec3 direction = rec.normal.plus(Vec3.randomUnitVector());
-            //return rayColor(new Ray(rec.p, direction), depth - 1, world).multiply(0.1);
-            //return rec.normal.plus(new Vec3(1,1,1)).multiply(0.5);
+            return new Vec3(0,0,0);
         }
         
 
