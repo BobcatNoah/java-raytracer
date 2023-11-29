@@ -1,8 +1,18 @@
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+
+
 public class Camera {
     public double aspectRatio = 1.0;
-    public int imageWidth = 100;
-    public int samplesPerPixel = 10;
-    public int maxDepth = 10;
+    public volatile int imageWidth = 100;
+    public volatile int samplesPerPixel = 10;
+    public volatile int maxDepth = 10;
 
     public double vfov = 90;                        // Vertical view angle (field of view)
     public Vec3 lookFrom =  new Vec3(0,0,-1); // Point camera is looking from
@@ -10,45 +20,80 @@ public class Camera {
     public Vec3 vup = new Vec3(0,1,0);     // Camera-relative "up" direction
     private Vec3 u, v, w;        // Camera frame basis vectors
 
-    private int imageHeight;
+    private volatile int imageHeight;
     private Vec3 center;
-    private Vec3 pixel00Loc;
+    private volatile Vec3 pixel00Loc;
     private Vec3 pixelDeltaU;
     private Vec3 pixelDeltaV;
 
     public void multiThreadedRender(final HittableList world, int threads) {
         initialize();
+        samplesPerPixel /= threads;
         
         System.out.print("P3\n" + imageWidth + ' ' + imageHeight + "\n255\n");
         Vec3[] finalImage = new Vec3[imageWidth * imageHeight];
         for (int i = 0; i < finalImage.length; i++) {
             finalImage[i] = new Vec3();
         }
-        Vec3 pixelColor = new Vec3(0,0,0);
+
+        ExecutorService executorService = Executors.newFixedThreadPool(threads);
+        List<Future<Vec3[]>> futures = new ArrayList<>();
+        System.err.println(samplesPerPixel);
 
         for (int thread = 0; thread < threads; thread++) {
-            for (int j = 0; j < imageHeight; j++) {
-                System.err.print("\rScanlines remaining: " + (imageHeight - j) + ' ');
-                System.err.flush();
-                for (int i = 0; i < imageWidth; i++) {
-                    pixelColor.set(0, 0, 0);
-                    Vec3 pixelCenter = pixel00Loc
-                    .plus(
-                        pixelDeltaU.multiply(i)
-                    ).plus(
-                        pixelDeltaV.multiply(j)  
-                    );
-                    for (int sample = 0; sample < samplesPerPixel; sample++) {
-                        Ray r = getRay(i, j, pixelCenter);
-                        pixelColor.plusEquals(rayColor(r, maxDepth, world));
+            HittableList worldCopy = world.createCopy();
+            Callable<Vec3[]> renderTask = () -> {
+                long start = System.currentTimeMillis();
+                Vec3[] partialImage = new Vec3[imageWidth * imageHeight];
+
+                for (int j = 0; j < imageHeight; j++) {
+                    //System.err.print("\rScanlines remaining: " + (imageHeight - j) + ' ');
+                    //System.err.flush();
+                    for (int i = 0; i < imageWidth; i++) {
+                        Vec3 pixelColor = new Vec3(0,0,0);
+                        Vec3 pixelCenter = pixel00Loc
+                        .plus(
+                            pixelDeltaU.multiply(i)
+                        ).plus(
+                            pixelDeltaV.multiply(j)  
+                        );
+                        for (int sample = 0; sample < samplesPerPixel; sample++) {
+                            Ray r = getRay(i, j, pixelCenter);
+                            pixelColor.plusEquals(rayColor(r, maxDepth, worldCopy));
+                        }
+                        partialImage[j*imageWidth+i] = pixelColor;
                     }
-                    finalImage[j*imageWidth + i] = finalImage[j*imageWidth + i].plus(pixelColor).divideBy(2);
                 }
-            }
-            System.err.print("\rDone.                           \n");
+                System.err.print("\rDone.                           \n");
+                System.err.println("Render time (ms): " + (System.currentTimeMillis() - start));
+                return partialImage;
+            };  
+            futures.add(executorService.submit(renderTask));            
         }
+
+        executorService.shutdown();
+
+        try {
+            executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+        } catch (InterruptedException e) {
+            // Handle interruption
+            e.printStackTrace();
+        }
+
+         for (Future<Vec3[]> future : futures) {
+            try {
+                Vec3[] partialImage = future.get();
+                for (int i = 0; i < finalImage.length; i++) {
+                    finalImage[i].plusEquals(partialImage[i]);
+                }
+            } catch (InterruptedException | ExecutionException e) {
+                // Handle exceptions
+                e.printStackTrace();
+            }
+        }
+
         for (int i = 0; i < finalImage.length; i++) {
-            System.out.print(Color.getColor(finalImage[i], samplesPerPixel));
+            System.out.print(Color.getColor(finalImage[i], samplesPerPixel * threads));
         }
     }
 
