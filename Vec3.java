@@ -125,8 +125,8 @@ public class Vec3 {
         Vec3 rOutParallel = n.multiply(-Math.sqrt(Math.abs(1.0 - rOutPerp.lengthSquared())));
         return rOutPerp.plus(rOutParallel);
     }
-    
-     public static Vec3 cross(final Vec3 u, final Vec3 v) {
+
+    public static Vec3 cross(final Vec3 u, final Vec3 v) {
         return new Vec3(u.e[1] * v.e[2] - u.e[2] * v.e[1], 
                         u.e[2] * v.e[0] - u.e[0] * v.e[2],
                         u.e[0] * v.e[1] - u.e[1] * v.e[0]);

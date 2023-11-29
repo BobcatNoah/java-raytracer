@@ -23,8 +23,8 @@ class Main {
 
         cam.aspectRatio = 16.0 / 9.0;
         cam.imageWidth = 400;
-        cam.samplesPerPixel = 100;
-        cam.maxDepth = 50;
+        cam.samplesPerPixel = 128;
+        cam.maxDepth = 12;
 
         cam.vfov = 20;
         cam.lookFrom = new Vec3(-2,2,1);
@@ -33,7 +33,7 @@ class Main {
 
         long start = System.currentTimeMillis();
         cam.render(world);
-        //cam.multiThreadedRender(world, 4);
+        //cam.multiThreadedRender(world, 5);
         System.err.println("Total time: " + (System.currentTimeMillis() - start));
     }
 }

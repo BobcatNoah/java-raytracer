@@ -18,37 +18,37 @@ public class Camera {
 
     public void multiThreadedRender(final HittableList world, int threads) {
         initialize();
-        Thread[] jobs = new Thread[threads];
-        MultiThreadedRender[] chunks = new MultiThreadedRender[threads];
-        for (int i = 0; i < threads - 1; i++) {
-            HittableList worldCopy = world.createCopy();
-            Interval currentRows = new Interval(i * imageHeight / threads, (i + 1) * imageHeight / threads);
-            MultiThreadedRender chunk = new MultiThreadedRender(worldCopy, currentRows, pixel00Loc, pixelDeltaU, pixelDeltaV, imageWidth, center, samplesPerPixel);
-            Thread thread = new Thread(chunk, "thread");
-            chunks[i] = chunk;
-            jobs[i] = thread;
-            thread.start();
-        }
         
-        HittableList worldCopy = world.createCopy();
-        MultiThreadedRender chunk = new MultiThreadedRender(worldCopy, new Interval((threads - 1) * imageHeight / threads, imageHeight), pixel00Loc, pixelDeltaU, pixelDeltaV, imageWidth, center, samplesPerPixel);
-        Thread thread = new Thread(chunk, "finalthread");
-        jobs[threads - 1] = thread;
-        chunks[threads - 1] = chunk;
-        thread.start();
-
         System.out.print("P3\n" + imageWidth + ' ' + imageHeight + "\n255\n");
+        Vec3[] finalImage = new Vec3[imageWidth * imageHeight];
+        for (int i = 0; i < finalImage.length; i++) {
+            finalImage[i] = new Vec3();
+        }
+        Vec3 pixelColor = new Vec3(0,0,0);
 
-        // Wait for threads to finish
-        for (int i = 0; i < threads; i++) {
-            try {
-                jobs[i].join();
-                System.out.print(chunks[i].getOutput());
-                System.err.println("Chunk " + i + ": " + chunks[i].getTime() + " milliseconds");
-                System.err.println(chunks[i].scanLinesToBeRendered);
-            } catch (InterruptedException e) {
-                // TODO: handle exception
+        for (int thread = 0; thread < threads; thread++) {
+            for (int j = 0; j < imageHeight; j++) {
+                System.err.print("\rScanlines remaining: " + (imageHeight - j) + ' ');
+                System.err.flush();
+                for (int i = 0; i < imageWidth; i++) {
+                    pixelColor.set(0, 0, 0);
+                    Vec3 pixelCenter = pixel00Loc
+                    .plus(
+                        pixelDeltaU.multiply(i)
+                    ).plus(
+                        pixelDeltaV.multiply(j)  
+                    );
+                    for (int sample = 0; sample < samplesPerPixel; sample++) {
+                        Ray r = getRay(i, j, pixelCenter);
+                        pixelColor.plusEquals(rayColor(r, maxDepth, world));
+                    }
+                    finalImage[j*imageWidth + i] = finalImage[j*imageWidth + i].plus(pixelColor).divideBy(2);
+                }
             }
+            System.err.print("\rDone.                           \n");
+        }
+        for (int i = 0; i < finalImage.length; i++) {
+            System.out.print(Color.getColor(finalImage[i], samplesPerPixel));
         }
     }
 
@@ -91,7 +91,6 @@ public class Camera {
         center =  lookFrom;
 
         double focalLength  = lookFrom.minus(lookAt).length();
-        System.err.println(focalLength);
         double theta = RTWeekend.degreesToRadians(vfov);
         double h = Math.tan(theta/2);
         double viewportHeight = 2 * h * focalLength;
