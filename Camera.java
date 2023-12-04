@@ -25,6 +25,11 @@ public class Camera {
     private volatile Vec3 pixel00Loc;
     private Vec3 pixelDeltaU;
     private Vec3 pixelDeltaV;
+    private Vec3 defocusDiskU;  // Defocus disk horizontal radius
+    private Vec3 defocusDiskV;  // Defocus disk vertical radius
+
+    public double defocusAngle = 0;  // Variation angle of rays through each pixel
+    public double focusDist = 10;    // Distance from camera lookfrom point to plane of perfect focus
 
     public void multiThreadedRender(final HittableList world, int threads) {
         initialize();
@@ -135,10 +140,9 @@ public class Camera {
 
         center =  lookFrom;
 
-        double focalLength  = lookFrom.minus(lookAt).length();
         double theta = RTWeekend.degreesToRadians(vfov);
         double h = Math.tan(theta/2);
-        double viewportHeight = 2 * h * focalLength;
+        double viewportHeight = 2 * h * focusDist;
         double viewportWidth = viewportHeight * ((double)imageWidth / imageHeight);
 
         // Calculate the u,v,w unit basis vectors for the camera coordinate frame.
@@ -156,7 +160,7 @@ public class Camera {
 
         // Calculate the location of the upper left pixel.
         Vec3 viewportUpperLeft = center.minus(
-            w.multiply(focalLength)
+            w.multiply(focusDist)
         ).minus(
             viewportU.divideBy(2)
         ).minus(
@@ -164,6 +168,10 @@ public class Camera {
         );
         pixel00Loc = (pixelDeltaU.plus(pixelDeltaV)).multiply(0.5).plus(viewportUpperLeft);
 
+        // Calculate the camera defocus disk basis vectors.
+        double defocusRadius = focusDist * Math.tan(Math.toRadians(defocusAngle / 2));
+        defocusDiskU = u.multiply(defocusRadius);
+        defocusDiskV = v.multiply(defocusRadius);
     }
 
     public static Vec3 rayColor(final Ray r, int depth, final HittableList world) {
@@ -192,13 +200,24 @@ public class Camera {
     }
 
     private Ray getRay(int i, int j, Vec3 pixelCenter) {
-        // Get a randomly sampled camera ray for the pixel at location i,j.
+        // Get a randomly-sampled camera ray for the pixel at location i,j, originating from
+        // the camera defocus disk.
         Vec3 pixelSample = pixelSampleSquare().plus(pixelCenter);
 
-        Vec3 rayOrigin = center;
+        Vec3 rayOrigin = (defocusAngle <= 0) ? center : defocusDiskSample();
         Vec3 rayDirection = pixelSample.minus(rayOrigin);
 
         return new Ray(rayOrigin, rayDirection);
+    }
+
+    Vec3 defocusDiskSample() {
+        // Returns a random point in the camera defocus disk.
+        Vec3 p = Vec3.randomInUnitDisk();
+        return center.plus(
+            defocusDiskU.multiply(p.x())
+        ).plus(
+            defocusDiskV.multiply(p.y())
+        );
     }
 
     private Vec3 pixelSampleSquare() {

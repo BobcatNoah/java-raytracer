@@ -105,6 +105,15 @@ public class Vec3 {
     public static Vec3 randomUnitVector() {
         return unit_vector(randomInUnitSphere());
     }
+
+    public static Vec3 randomInUnitDisk() {
+        while (true) {
+            Vec3 p = new Vec3(RTWeekend.randomDouble(-1, 1), RTWeekend.randomDouble(-1, 1), 0);
+            if (p.lengthSquared() < 1) {
+                return p;
+            }
+        }
+    }
     
     public static Vec3 randomOnHemisphere(final Vec3 normal) {
         Vec3 onUnitSphere = randomUnitVector();
