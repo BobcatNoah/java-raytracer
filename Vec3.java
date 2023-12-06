@@ -1,3 +1,5 @@
+import java.util.concurrent.ThreadLocalRandom;
+
 public class Vec3 {
     public double[] e = new double[3];
 
@@ -86,7 +88,7 @@ public class Vec3 {
     }
 
     public static Vec3 random() {
-        return new Vec3(Math.random(), Math.random(), Math.random());
+        return new Vec3(ThreadLocalRandom.current().nextDouble(), ThreadLocalRandom.current().nextDouble(), ThreadLocalRandom.current().nextDouble());
     }
 
     public static Vec3 random(double min, double max) {

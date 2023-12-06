@@ -5,6 +5,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 
@@ -43,7 +44,6 @@ public class Camera {
 
         ExecutorService executorService = Executors.newFixedThreadPool(threads);
         List<Future<Vec3[]>> futures = new ArrayList<>();
-        System.err.println(samplesPerPixel);
 
         for (int thread = 0; thread < threads; thread++) {
             HittableList worldCopy = world.createCopy();
@@ -52,8 +52,8 @@ public class Camera {
                 Vec3[] partialImage = new Vec3[imageWidth * imageHeight];
 
                 for (int j = 0; j < imageHeight; j++) {
-                    //System.err.print("\rScanlines remaining: " + (imageHeight - j) + ' ');
-                    //System.err.flush();
+                    System.err.print("\rScanlines remaining: " + (imageHeight - j) + ' ');
+                    System.err.flush();
                     for (int i = 0; i < imageWidth; i++) {
                         Vec3 pixelColor = new Vec3(0,0,0);
                         Vec3 pixelCenter = pixel00Loc
@@ -222,8 +222,8 @@ public class Camera {
 
     private Vec3 pixelSampleSquare() {
         // Returns a random point in the square surrounding a pixel at the origin.
-        double px = -0.5 * Math.random();
-        double py = -0.5 * Math.random();
+        double px = -0.5 * ThreadLocalRandom.current().nextDouble();
+        double py = -0.5 * ThreadLocalRandom.current().nextDouble();
         return pixelDeltaU.multiply(px).plus(pixelDeltaV.multiply(py));
     }
 }

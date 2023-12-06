@@ -1,3 +1,5 @@
+import java.util.concurrent.ThreadLocalRandom;
+
 public class Dielectric implements Material {
     // Refraction index
     private double ir;
@@ -27,7 +29,7 @@ public class Dielectric implements Material {
         boolean cannotRefract = refractionRatio * sinTheta > 1.0;
         Vec3 direction;
 
-        if (cannotRefract ||  reflectance(cosTheta, refractionRatio) > Math.random()) {
+        if (cannotRefract ||  reflectance(cosTheta, refractionRatio) > ThreadLocalRandom.current().nextDouble()) {
             direction = Vec3.reflect(unitDirection, rec.normal);
         } else {
             direction = Vec3.refract(unitDirection, rec.normal, refractionRatio);
