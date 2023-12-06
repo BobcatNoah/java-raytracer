@@ -55,7 +55,7 @@ class Main {
         try {
             InputStream objInputStream = new FileInputStream(Paths.get("data", "suzanne.obj").toString());
             Obj suzanne = ObjReader.read(objInputStream);
-            world.add(new VertexGeometry(suzanne, new TestMat()));
+            world.add(new VertexGeometry(suzanne, new Vec3(-2,0,0), 2, new TestMat()));
         } catch (Exception e) {
             e.printStackTrace();
         }

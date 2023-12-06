@@ -7,10 +7,39 @@ public class VertexGeometry implements Hittable {
     private Obj obj;
     private Material mat;
     private Vec3 origin;
+    private Vec3[][] faces;
+    private Vec3[] normals;
+    private double[] d;
+    private double scale = 1;
 
-    public VertexGeometry(Obj obj, Material mat) {
+    public VertexGeometry(Obj obj, Vec3 origin, int scale, Material mat) {
         this.obj = ObjUtils.triangulate(obj);
         this.mat = mat;
+        this.scale = scale;
+        this.origin = origin;
+
+        int faceCount = this.obj.getNumFaces();
+        this.faces = new Vec3[faceCount][3];
+        this.normals = new Vec3[faceCount];
+        this.d = new double[faceCount];
+        for (int i = 0; i < faceCount; i++) {
+            ObjFace face = this.obj.getFace(i);
+            FloatTuple p0 = this.obj.getVertex(face.getVertexIndex(0));
+            FloatTuple p1 = this.obj.getVertex(face.getVertexIndex(1));
+            FloatTuple p2 = this.obj.getVertex(face.getVertexIndex(2));
+            this.faces[i][0] = new Vec3(p0.get(0), p0.get(1), p0.get(2));
+            this.faces[i][1] = new Vec3(p1.get(0), p1.get(1), p1.get(2));
+            this.faces[i][2] = new Vec3(p2.get(0), p2.get(1), p2.get(2));
+            // Scale and translate model
+            this.faces[i][0] = this.faces[i][0].multiply(scale).plus(origin);
+            this.faces[i][1] = this.faces[i][1].multiply(scale).plus(origin);
+            this.faces[i][2] = this.faces[i][2].multiply(scale).plus(origin);
+
+            // unit_vector((B - A) X (C - A))
+            this.normals[i] = Vec3.unit_vector(Vec3.cross(this.faces[i][1].minus(this.faces[i][0]), this.faces[i][2].minus(this.faces[i][0]))); 
+            this.d[i] = Vec3.dot(this.normals[i], this.faces[i][0]);
+        }
+
     }
 
     @Override
@@ -21,16 +50,12 @@ public class VertexGeometry implements Hittable {
         boolean hitAnything = false;
 
         for (int i = 0; i < faceCount; i++) {
-            ObjFace face = obj.getFace(i);
-            FloatTuple p0 = obj.getVertex(face.getVertexIndex(0));
-            FloatTuple p1 = obj.getVertex(face.getVertexIndex(1));
-            FloatTuple p2 = obj.getVertex(face.getVertexIndex(2));
-            Vec3 a = new Vec3(p0.get(0), p0.get(1), p0.get(2));
-            Vec3 b = new Vec3(p1.get(0), p1.get(1), p1.get(2));
-            Vec3 c = new Vec3(p2.get(0), p2.get(1), p2.get(2));
+            Vec3 a = this.faces[i][0];
+            Vec3 b = this.faces[i][1];
+            Vec3 c = this.faces[i][2];
 
-            Vec3 faceNormal = Vec3.unit_vector(Vec3.cross(b.minus(a), c.minus(a)));
-            double d = Vec3.dot(faceNormal, a);
+            Vec3 faceNormal = this.normals[i];
+            double d = this.d[i];
 
             boolean isOccluded = Vec3.dot(a.minus(r.origin()), faceNormal) >= 0;
 
