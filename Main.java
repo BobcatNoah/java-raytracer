@@ -48,35 +48,35 @@ class Main {
         Material material3 = new Metal(new Vec3(0.7, 0.6, 0.5), 0.0);
         world.add(new Sphere(new Vec3(4, 1, 0), 1.0, material3));
 
-        //try {
-        //    InputStream objInputStream = new FileInputStream(Paths.get("data", "suzanne.obj").toString());
-        //    Obj suzanne = ObjReader.read(objInputStream);
-        //    world.add(new VertexGeometry(suzanne, new Vec3(0,0,0), 2, new TestMat()));
-        //} catch (Exception e) {
-        //    e.printStackTrace();
-        //}
+        try {
+            InputStream objInputStream = new FileInputStream(Paths.get("data", "suzanne.obj").toString());
+            Obj suzanne = ObjReader.read(objInputStream);
+            VertexGeometry monkey = new VertexGeometry(suzanne, new Vec3(5,1,0), 1, new TestMat());
+            world.add(monkey);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
+        
 
 
         Camera cam = new Camera();
 
         cam.aspectRatio = 16.0 / 9.0;
-        cam.imageWidth = 300;
+        cam.imageWidth = 400;
         cam.samplesPerPixel = 64;
         cam.maxDepth = 12;
 
         cam.vfov = 20;
-        //cam.vfov = 15;
         cam.lookFrom = new Vec3(13,2,3);
         cam.lookAt = new Vec3(0,0,0);
         cam.vup = new Vec3(0,1,0);
         cam.defocusAngle = 0.6;
-        //cam.defocusAngle = 0;
         cam.focusDist = 10.0;
 
         long start = System.currentTimeMillis();
-        cam.render(world);
-        //cam.multiThreadedRender(world, 4);
+        //cam.render(world);
+        cam.multiThreadedRender(world, 4);
         System.err.println("Total time: " + (System.currentTimeMillis() - start));
     }
 }

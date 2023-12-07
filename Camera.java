@@ -69,7 +69,6 @@ public class Camera {
                         partialImage[j*imageWidth+i] = pixelColor;
                     }
                 }
-                System.err.print("\rDone.                           \n");
                 System.err.println("Render time (ms): " + (System.currentTimeMillis() - start));
                 return partialImage;
             };  
