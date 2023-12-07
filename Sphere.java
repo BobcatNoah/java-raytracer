@@ -9,6 +9,10 @@ public class Sphere implements Hittable {
         this.mat = _material;
     }
 
+    public Sphere createCopy() {
+        return new Sphere(new Vec3(center.e[0], center.e[1], center.e[2]), radius, mat.createCopy());
+    }
+
     public boolean hit(Ray r, Interval ray_t, HitRecord rec) {
         Vec3 oc = r.origin().minus(center);
         double a = r.direction().lengthSquared();

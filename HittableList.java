@@ -24,8 +24,8 @@ public class HittableList implements Hittable {
 
     public HittableList createCopy() {
         HittableList copy = new HittableList();
-        for (Hittable i : objects) {
-            copy.add(i);
+        for (Hittable object : objects) {
+            copy.add(object.createCopy());
         }
         return copy;
     }

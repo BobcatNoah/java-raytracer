@@ -10,27 +10,27 @@ import java.util.concurrent.TimeUnit;
 
 
 public class Camera {
-    public double aspectRatio = 1.0;
+    public volatile double aspectRatio = 1.0;
     public volatile int imageWidth = 100;
     public volatile int samplesPerPixel = 10;
     public volatile int maxDepth = 10;
 
-    public double vfov = 90;                        // Vertical view angle (field of view)
-    public Vec3 lookFrom =  new Vec3(0,0,-1); // Point camera is looking from
-    public Vec3 lookAt = new Vec3(0,0,0);  // Point camera is looking at
-    public Vec3 vup = new Vec3(0,1,0);     // Camera-relative "up" direction
-    private Vec3 u, v, w;        // Camera frame basis vectors
+    public volatile double vfov = 90;                        // Vertical view angle (field of view)
+    public volatile Vec3 lookFrom =  new Vec3(0,0,-1); // Point camera is looking from
+    public volatile Vec3 lookAt = new Vec3(0,0,0);  // Point camera is looking at
+    public volatile Vec3 vup = new Vec3(0,1,0);     // Camera-relative "up" direction
+    private volatile Vec3 u, v, w;        // Camera frame basis vectors
 
     private volatile int imageHeight;
-    private Vec3 center;
+    private volatile Vec3 center;
     private volatile Vec3 pixel00Loc;
-    private Vec3 pixelDeltaU;
-    private Vec3 pixelDeltaV;
-    private Vec3 defocusDiskU;  // Defocus disk horizontal radius
-    private Vec3 defocusDiskV;  // Defocus disk vertical radius
+    private volatile Vec3 pixelDeltaU;
+    private volatile Vec3 pixelDeltaV;
+    private volatile Vec3 defocusDiskU;  // Defocus disk horizontal radius
+    private volatile Vec3 defocusDiskV;  // Defocus disk vertical radius
 
-    public double defocusAngle = 0;  // Variation angle of rays through each pixel
-    public double focusDist = 10;    // Distance from camera lookfrom point to plane of perfect focus
+    public volatile double defocusAngle = 0;  // Variation angle of rays through each pixel
+    public volatile double focusDist = 10;    // Distance from camera lookfrom point to plane of perfect focus
 
     public void multiThreadedRender(final HittableList world, int threads) {
         initialize();
@@ -91,7 +91,7 @@ public class Camera {
                 for (int i = 0; i < finalImage.length; i++) {
                     finalImage[i].plusEquals(partialImage[i]);
                 }
-            } catch (InterruptedException | ExecutionException e) {
+            } catch (InterruptedException | ExecutionException e ) {
                 // Handle exceptions
                 e.printStackTrace();
             }

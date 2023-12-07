@@ -27,4 +27,9 @@ public class TestMat implements Material {
         latestScattered = scattered;
         return true;
     }
+
+    @Override
+    public Material createCopy() {
+        return new TestMat();
+    }
 }

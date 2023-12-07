@@ -1,7 +1,10 @@
 import de.javagl.obj.FloatTuple;
 import de.javagl.obj.Obj;
+import de.javagl.obj.ObjData;
 import de.javagl.obj.ObjFace;
+import de.javagl.obj.ObjReader;
 import de.javagl.obj.ObjUtils;
+import de.javagl.obj.Objs;
 
 public class VertexGeometry implements Hittable {
     private Obj obj;
@@ -12,7 +15,7 @@ public class VertexGeometry implements Hittable {
     private double[] d;
     private double scale = 1;
 
-    public VertexGeometry(Obj obj, Vec3 origin, int scale, Material mat) {
+    public VertexGeometry(Obj obj, Vec3 origin, double scale, Material mat) {
         this.obj = ObjUtils.triangulate(obj);
         this.mat = mat;
         this.scale = scale;
@@ -83,5 +86,11 @@ public class VertexGeometry implements Hittable {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public Hittable createCopy() {
+        // I'll figure out how to copy an obj later.
+        return new VertexGeometry(obj, new Vec3(origin.e[0], origin.e[1], origin.e[2]), this.scale, mat.createCopy());
     }
 }

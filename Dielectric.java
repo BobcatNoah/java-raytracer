@@ -45,4 +45,9 @@ public class Dielectric implements Material {
         r0 = r0*r0;
         return r0 + (1-r0)*Math.pow((1 - cosine),5);
     }
+
+    @Override
+    public Material createCopy() {
+        return new Dielectric(ir);
+    }
 }

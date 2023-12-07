@@ -24,4 +24,9 @@ public class Metal implements Material {
         latestScattered = scattered;
         return (Vec3.dot(scattered.direction(), rec.normal) > 0);
     }
+
+    @Override
+    public Material createCopy() {
+        return new Metal(new Vec3(albedo.e[0], albedo.e[1], albedo.e[2]), fuzz);
+    }
 }

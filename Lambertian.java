@@ -29,4 +29,9 @@ public class Lambertian implements Material {
         latestScattered = scattered;
         return true;
     }
+
+    @Override
+    public Material createCopy() {
+        return new Lambertian(new Vec3(albedo.e[0], albedo.e[1], albedo.e[2]));
+    }
 }
