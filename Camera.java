@@ -180,7 +180,7 @@ public class Camera {
             return new Vec3(0,0,0);
         }
 
-        if (world.hit(r, new Interval(0.001 , RTWeekend.infinity), rec)) {
+        if (world.hit(r, new Interval(0.000001 , RTWeekend.infinity), rec)) {
             rec = world.getLatestHitRecord();
             Ray scattered = new Ray();
             Vec3 attenuation = new Vec3();
